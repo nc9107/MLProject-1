@@ -38,7 +38,9 @@ def main():
     pd.set_option('display.max_columns', 60)
     # Read in data into data frames
     # data = pd.read_csv('data/Energy_and_Water_Data_Disclosure_for_Local_Law_84_2017__Data_for_Calendar_Year_2016_.csv')
-    data = pd.read_csv('C:\\Users\\Venkata\\Desktop\\MLProject-data-1.csv')
+    # data = pd.read_csv('C:\\Users\\Venkata\\Desktop\\MLProject-data-1.csv')
+    data = pd.read_csv('MLProject-data-1.csv')
+
     # Display top of dataframe
     # data.head()
     #
@@ -77,7 +79,7 @@ def main():
     they can be used to inform modeling decisions such as which features to use. In short, the goal of EDA 
     is to determine what our data can tell us! EDA generally starts out with a high-level overview, and then narrows 
     in to specific parts of the dataset once as we find interesting areas to examine.
-    
+
     """
     # An univariate plot shows the distribution shows the distribution of a single variable such as in histogram.
 
@@ -116,16 +118,47 @@ def main():
     plt.title('Site EUI distribution')
     # plt.show()
 
-    print("/////////////////////////*****************************")
-    print(data['Site EUI (kBtu/ft²)'].describe())
+    # print("/////////////////////////*****************************")
+    # print(data['Site EUI (kBtu/ft²)'].describe())
 
-    #Getting the buildings with the highest energy ratings.
-    print(data['Site EUI (kBtu/ft²)'].dropna().sort_values().tail(10))
+    # Getting the buildings with the highest energy ratings.
+    #  print(data['Site EUI (kBtu/ft²)'].dropna().sort_values().tail(10))
 
     # Extracting that column from the data set.
-    print(data.loc[data['Site EUI (kBtu/ft²)'] == 869265.0,:])
+    # print(data.loc[data['Site EUI (kBtu/ft²)'] == 869265.0,:])
+    """
+    Removing Outliers
+    When we remove outliers, we want to be careful that we are not throwing 
+    away measurements just because they look strange. They may be the result 
+    of actual phenomenon that we should further investigate. When removing 
+    outliers, I try to be as conservative as possible, using the definition of
+     an extreme outlier:
 
+    On the low end, an extreme outlier is below:
+     $\text{First Quartile} -3 * \text{Interquartile Range}$
 
+    On the high end, an extreme outlier is above:
+     $\text{Third Quartile} + 3 * \text{Interquartile Range}$
+    """
+    # Calculating first and third quartile
+    first_quartile = data['Site EUI (kBtu/ft²)'].describe()['25%']
+    third_quartile = data['Site EUI (kBtu/ft²)'].describe()['75%']
 
+    # Calculating interquartile range
+    iqr = third_quartile - first_quartile
+
+    # Removing outliers data = data
+    data = data[(data['Site EUI (kBtu/ft²)'] > (first_quartile - 3 * iqr)) &
+                (data['Site EUI (kBtu/ft²)'] < (third_quartile + 3 * iqr))]
+
+    # Plotting a revised SITE EUI Distribution s
+    figsize(8, 8)
+    plt.hist(data['Site EUI (kBtu/ft²)'].dropna(), bins=20, edgecolor='black');
+    plt.xlabel('Site EUI');
+    plt.ylabel('Count');
+    plt.title('Site EUI Distribution');
+    plt.show()
+
+# db.Dogs.find({"fleas":{$gt:5}})
 if __name__ == '__main__':
     main()
